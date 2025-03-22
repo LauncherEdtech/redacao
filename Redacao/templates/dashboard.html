@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Bem-vindo, {{ user.username }}!</h2>
+<p>Créditos disponíveis: {{ user.credits }}</p>
+<p>Média de notas: {{ avg_score }}</p>
+<p>Melhor nota: {{ best_score }}</p>
+
+<h3>Minhas Redações</h3>
+<ul>
+{% for essay in essays %}
+    <li>
+        <a href="{{ url_for('feedback_page', essay_id=essay.id) }}">
+            {{ essay.title if essay.title else "Sem título" }} - Nota: {{ essay.score_total }}
+        </a>
+    </li>
+{% endfor %}
+</ul>
+{% endblock %}
