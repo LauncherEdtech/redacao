@@ -10,6 +10,8 @@ from essay_evaluator import evaluate_essay
 from visualization import radar_chart
 import plotly
 import json
+# app.py
+from models import db, User, Essay, CompetenceFeedback
 
 
 
@@ -72,40 +74,47 @@ def create_app():
             title = request.form.get('title')
             text = request.form.get('text')
             
-            # Envia para avaliação GPT-4
+            # Chama a função que avalia a redação via GPT-4 e retorna o JSON
             feedback_data = evaluate_essay(text)
             
-            # Salva no banco
-            # Extraia cada competência
-            comp1 = feedback_data["competencias"][0]
-            comp2 = feedback_data["competencias"][1]
-            comp3 = feedback_data["competencias"][2]
-            comp4 = feedback_data["competencias"][3]
-            comp5 = feedback_data["competencias"][4]
-
+            # Salva o registro da redação (opcional: também salvando o JSON completo)
             essay = Essay(
                 user_id=user.id,
                 title=title,
                 text=text,
-                feedback=feedback_data,  # Armazena o JSON completo se quiser
+                feedback=feedback_data,  # opcional, se quiser manter o JSON
                 score_total=feedback_data["nota_total"],
-
-                comp1_score=comp1["nota"],
-            comp2_score=comp2["nota"],
-            comp3_score=comp3["nota"],
-            comp4_score=comp4["nota"],
-            comp5_score=comp5["nota"],
-        )
-
+                comp1_score=feedback_data["competencias"][0]["nota"],
+                comp2_score=feedback_data["competencias"][1]["nota"],
+                comp3_score=feedback_data["competencias"][2]["nota"],
+                comp4_score=feedback_data["competencias"][3]["nota"],
+                comp5_score=feedback_data["competencias"][4]["nota"],
+            )
             db.session.add(essay)
-            db.session.commit()
-            # Decrementa crédito
-            user.credits -= 1
+            db.session.commit()  # Para obter o ID da redação
+            
+            # Agora, para cada competência, crie um registro na nova tabela
+            for comp in feedback_data["competencias"]:
+                cf = CompetenceFeedback(
+                    essay_id=essay.id,
+                    numero=comp["numero"],
+                    nome=comp["nome"],
+                    nota=comp["nota"],
+                    justificativa=comp["justificativa"],
+                    # Se os dados forem listas, converta para string:
+                    pontos_fortes=", ".join(comp["pontos_fortes"]) if comp.get("pontos_fortes") else None,
+                    pontos_fracos=", ".join(comp["pontos_fracos"]) if comp.get("pontos_fracos") else None,
+                    sugestoes=", ".join(comp["sugestoes"]) if comp.get("sugestoes") else None,
+                )
+                db.session.add(cf)
+            # Finalize a transação
             db.session.commit()
             
+            # Redireciona para a página de feedback
             return redirect(url_for('feedback_page', essay_id=essay.id))
         
         return render_template('submit_essay.html')
+
     
     @app.route('/feedback/<int:essay_id>')
     def feedback_page(essay_id):
@@ -114,33 +123,23 @@ def create_app():
         
         essay = Essay.query.get_or_404(essay_id)
         
-        # Verifica se a redação pertence ao usuário
         if essay.user_id != session['user_id']:
             return redirect(url_for('dashboard'))
         
-        feedback_data = essay.feedback
+        # Buscar os feedbacks detalhados da nova tabela
+        competence_feedbacks = CompetenceFeedback.query.filter_by(essay_id=essay.id).order_by(CompetenceFeedback.numero).all()
         
-        # Gera radar chart
-        comp_scores = [
-            essay.comp1_score or 0,
-            essay.comp2_score or 0,
-            essay.comp3_score or 0,
-            essay.comp4_score or 0,
-            essay.comp5_score or 0
-        ]
+        # Gerar o gráfico de radar, se necessário
+        comp_scores = [cf.nota for cf in competence_feedbacks]
         radar_fig = radar_chart(comp_scores)
-        
-        # Converte figura Plotly para div HTML
         radar_div = plotly.offline.plot(radar_fig, include_plotlyjs=False, output_type='div')
         
-        return render_template('feedback.html',
-                               essay=essay,
-                               feedback_data=feedback_data,
-                               radar_div=radar_div)
+        return render_template('feedback.html', essay=essay, competence_feedbacks=competence_feedbacks, radar_div=radar_div)
+
     
     return app
 
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=False)
+    app.run(debug=True, use_reloader=False)

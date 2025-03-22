@@ -24,6 +24,20 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+class CompetenceFeedback(db.Model):
+    __tablename__ = 'competence_feedback'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    essay_id = db.Column(db.Integer, db.ForeignKey('essays.id'), nullable=False)
+    numero = db.Column(db.Integer, nullable=False)
+    nome = db.Column(db.String(255), nullable=False)
+    nota = db.Column(db.Integer, nullable=False)
+    justificativa = db.Column(db.Text, nullable=True)
+    pontos_fortes = db.Column(db.Text, nullable=True)
+    pontos_fracos = db.Column(db.Text, nullable=True)
+    sugestoes = db.Column(db.Text, nullable=True)
+
+
 class Essay(db.Model):
     __tablename__ = 'essays'
     
@@ -31,13 +45,16 @@ class Essay(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     title = db.Column(db.String(255), nullable=True)
     text = db.Column(db.Text, nullable=False)
-    feedback = db.Column(db.JSON, nullable=True)  # Armazena feedback em formato JSON
+    feedback = db.Column(db.JSON, nullable=True)  # (opcional, se ainda quiser salvar o JSON completo)
     score_total = db.Column(db.Integer, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Notas por competência (0-200)
+    # Notas por competência (0-200) – (podem continuar, se desejar)
     comp1_score = db.Column(db.Integer, nullable=True)
     comp2_score = db.Column(db.Integer, nullable=True)
     comp3_score = db.Column(db.Integer, nullable=True)
     comp4_score = db.Column(db.Integer, nullable=True)
     comp5_score = db.Column(db.Integer, nullable=True)
+    
+    # Novo relacionamento com a tabela de feedback de competências:
+    competence_feedbacks = db.relationship('CompetenceFeedback', backref='essay', lazy=True)
