@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Feedback da Redação</h2>
+
+<p><strong>Título:</strong> {{ essay.title }}</p>
+<p><strong>Texto:</strong></p>
+<p>{{ essay.text }}</p>
+
+<h3>Notas por Competência</h3>
+<ul>
+  {% for cf in competence_feedbacks %}
+    <li>
+       <strong>Competência {{ cf.numero }} - {{ cf.nome }}:</strong> {{ cf.nota }}
+    </li>
+  {% endfor %}
+</ul>
+<p><strong>Nota Total:</strong> {{ essay.score_total }}</p>
+
+<h3>Feedback Detalhado</h3>
+{% for cf in competence_feedbacks %}
+  <h4>Competência {{ cf.numero }} - {{ cf.nome }}</h4>
+  <p><strong>Justificativa:</strong> {{ cf.justificativa }}</p>
+  <p><strong>Pontos Fortes:</strong> {{ cf.pontos_fortes }}</p>
+  <p><strong>Pontos Fracos:</strong> {{ cf.pontos_fracos }}</p>
+  <p><strong>Sugestões:</strong> {{ cf.sugestoes }}</p>
+  <hr>
+{% endfor %}
+
+<div>
+    {{ radar_div|safe }}
+</div>
+{% endblock %}
