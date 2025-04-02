@@ -1,0 +1,489 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  /* Adicione estes estilos ao seu arquivo style.css */
+
+/* Estilos para a página de feedback */
+.feedback-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
+.essay-container {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.essay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.essay-title-section h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.essay-date {
+  display: block;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.essay-score-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+}
+
+.score-high {
+  background-color: #10b981;
+}
+
+.score-medium {
+  background-color: #f59e0b;
+}
+
+.score-low {
+  background-color: #ef4444;
+}
+
+.feedback-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .feedback-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+}
+
+.card-header h3 i {
+  margin-right: 0.5rem;
+  color: #6366f1;
+}
+
+.card-content {
+  padding: 1rem;
+}
+
+.essay-content {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  white-space: pre-line;
+  color: #4b5563;
+}
+
+.text-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.essay-text {
+  flex-grow: 1;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.summary-card {
+  margin-top: auto;
+}
+
+.radar-chart-container {
+  height: 250px;
+  margin-bottom: 1rem;
+}
+
+.score-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.75rem;
+}
+
+.score-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.score-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.score-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+}
+
+.total-score .score-value {
+  width: 3rem;
+  height: 3rem;
+  font-size: 1.25rem;
+}
+
+.competence-tabs {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.tabs-header {
+  display: flex;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  overflow-x: auto;
+}
+
+.tab-btn {
+  padding: 1rem 1.5rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: #4b5563;
+  background-color: #f3f4f6;
+}
+
+.tab-btn.active {
+  color: #6366f1;
+  border-bottom-color: #6366f1;
+}
+
+.tabs-content {
+  padding: 1.5rem;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.competence-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.competence-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1f2937;
+}
+
+.comp-score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+}
+
+.feedback-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: #f9fafb;
+}
+
+.feedback-section h4 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  color: #4b5563;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.feedback-section h4 i {
+  margin-right: 0.5rem;
+}
+
+.feedback-section p, 
+.feedback-section ul {
+  margin: 0;
+  color: #6b7280;
+}
+
+.feedback-section ul {
+  padding-left: 1.5rem;
+}
+
+.feedback-section li {
+  margin-bottom: 0.375rem;
+}
+
+.feedback-section li:last-child {
+  margin-bottom: 0;
+}
+
+.feedback-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .feedback-cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+.positive h4 i {
+  color: #10b981;
+}
+
+.negative h4 i {
+  color: #ef4444;
+}
+
+.suggestions h4 i {
+  color: #f59e0b;
+}
+
+.positive {
+  border-left: 4px solid #10b981;
+}
+
+.negative {
+  border-left: 4px solid #ef4444;
+}
+
+.suggestions {
+  border-left: 4px solid #f59e0b;
+}
+</style>
+<div class="feedback-header">
+  <h1 class="page-title">Feedback da Redação</h1>
+  <a href="{{ url_for('dashboard') }}" class="btn-back">
+    <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+  </a>
+</div>
+
+<div class="essay-container">
+  <div class="essay-header">
+    <div class="essay-title-section">
+      <h2>{{ essay.title }}</h2>
+      <span class="essay-date">{{ essay.created_at.strftime('%d/%m/%Y') if essay.created_at else "N/A" }}</span>
+    </div>
+    <div class="essay-score-badge {% if essay.score_total >= 700 %}score-high{% elif essay.score_total >= 500 %}score-medium{% else %}score-low{% endif %}">
+      {{ essay.score_total }}
+    </div>
+  </div>
+
+  <div class="feedback-grid">
+    <div class="text-column">
+      <div class="card essay-text">
+        <div class="card-header">
+          <h3><i class="fas fa-file-alt"></i> Texto Original</h3>
+        </div>
+        <div class="card-content">
+          <p class="essay-content">{{ essay.text }}</p>
+        </div>
+      </div>
+      
+      <div class="card summary-card">
+        <div class="card-header">
+          <h3><i class="fas fa-chart-bar"></i> Resumo da Avaliação</h3>
+        </div>
+        <div class="card-content">
+          <div class="radar-chart-container">
+            {{ radar_div|safe }}
+          </div>
+          <div class="score-summary">
+            <div class="score-item total-score">
+              <span class="score-label">Nota Total</span>
+              <span class="score-value {% if essay.score_total >= 700 %}score-high{% elif essay.score_total >= 500 %}score-medium{% else %}score-low{% endif %}">{{ essay.score_total }}</span>
+            </div>
+            {% for cf in competence_feedbacks %}
+            <div class="score-item">
+              <span class="score-label">Comp. {{ cf.numero }}</span>
+              <span class="score-value {% if cf.nota >= 160 %}score-high{% elif cf.nota >= 100 %}score-medium{% else %}score-low{% endif %}">{{ cf.nota }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="feedback-column">
+      <div class="competence-tabs">
+        <div class="tabs-header">
+          {% for cf in competence_feedbacks %}
+          <button class="tab-btn {% if loop.first %}active{% endif %}" data-tab="tab-{{ cf.numero }}">
+            Comp. {{ cf.numero }}
+          </button>
+          {% endfor %}
+        </div>
+        
+        <div class="tabs-content">
+          {% for cf in competence_feedbacks %}
+          <div class="tab-content {% if loop.first %}active{% endif %}" id="tab-{{ cf.numero }}">
+            <div class="competence-header">
+              <h3>Competência {{ cf.numero }} - {{ cf.nome }}</h3>
+              <div class="comp-score {% if cf.nota >= 160 %}score-high{% elif cf.nota >= 100 %}score-medium{% else %}score-low{% endif %}">
+                {{ cf.nota }}
+              </div>
+            </div>
+            
+            <div class="feedback-section">
+              <h4><i class="fas fa-comment"></i> Justificativa</h4>
+              <p>{{ cf.justificativa }}</p>
+            </div>
+           <!-- Pontos Fortes -->
+<div class="feedback-section positive">
+  <h4><i class="fas fa-plus-circle"></i> Pontos Fortes</h4>
+  <ul>
+    {% if cf.pontos_fortes %}
+      {% for ponto in cf.pontos_fortes.split(', ') %}
+        <li>{{ ponto }}</li>
+      {% endfor %}
+    {% else %}
+      <li>Nenhum ponto forte destacado</li>
+    {% endif %}
+  </ul>
+</div>
+
+<!-- Pontos Fracos -->
+<div class="feedback-section negative">
+  <h4><i class="fas fa-minus-circle"></i> Pontos Fracos</h4>
+  <ul>
+    {% if cf.pontos_fracos %}
+      {% for ponto in cf.pontos_fracos.split(', ') %}
+        <li>{{ ponto }}</li>
+      {% endfor %}
+    {% else %}
+      <li>Nenhum ponto fraco destacado</li>
+    {% endif %}
+  </ul>
+</div>
+
+<!-- Sugestões -->
+<div class="feedback-section suggestions">
+  <h4><i class="fas fa-lightbulb"></i> Sugestões</h4>
+  <ul>
+    {% if cf.sugestoes %}
+      {% for sugestao in cf.sugestoes.split(', ') %}
+        <li>{{ sugestao }}</li>
+      {% endfor %}
+    {% else %}
+      <li>Nenhuma sugestão específica</li>
+    {% endif %}
+  </ul>
+</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Controle das abas
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Remove a classe ativa de todos os botões e conteúdos
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        // Adiciona a classe ativa ao botão clicado
+        button.classList.add('active');
+        
+        // Ativa o conteúdo correspondente
+        const tabId = button.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+  });
+</script>
+{% endblock %}
