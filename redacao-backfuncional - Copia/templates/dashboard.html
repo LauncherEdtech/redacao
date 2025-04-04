@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-header">
+  <h1 class="page-title">Dashboard</h1>
+  <p class="welcome-message">Bem-vindo, {{ user.username }}!</p>
+</div>
+
+<div class="stats-container">
+  <div class="stat-card">
+    <div class="stat-icon">
+      <i class="fas fa-coins"></i>
+    </div>
+    <div class="stat-content">
+      <span class="stat-value">{{ user.credits }}</span>
+      <span class="stat-label">Créditos disponíveis</span>
+    </div>
+  </div>
+  
+  <div class="stat-card">
+    <div class="stat-icon">
+      <i class="fas fa-chart-line"></i>
+    </div>
+    <div class="stat-content">
+      <span class="stat-value">{{  "%.1f"|format(avg_score)  }}</span>
+      <span class="stat-label">Média de notas</span>
+    </div>
+  </div>
+  
+  <div class="stat-card">
+    <div class="stat-icon">
+      <i class="fas fa-trophy"></i>
+    </div>
+    <div class="stat-content">
+      <span class="stat-value">{{ best_score }}</span>
+      <span class="stat-label">Melhor nota</span>
+    </div>
+  </div>
+  
+  <div class="stat-card">
+    <div class="stat-icon">
+      <i class="fas fa-file-alt"></i>
+    </div>
+    <div class="stat-content">
+      <span class="stat-value">{{ essays|length }}</span>
+      <span class="stat-label">Redações enviadas</span>
+    </div>
+  </div>
+</div>
+
+{% if essays %}
+<div class="recent-essays">
+  <div class="section-header">
+    <h2>Minhas Redações</h2>
+    <a href="{{ url_for('submit_essay') }}" class="btn-primary">
+      <i class="fas fa-plus"></i> Nova Redação
+    </a>
+  </div>
+  
+  <div class="essays-table-container">
+    <table class="essays-table">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Data</th>
+          <th>Nota</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for essay in essays %}
+        <tr>
+          <td class="essay-title">{{ essay.title if essay.title else "Sem título" }}</td>
+          <td class="essay-date">{{ essay.created_at.strftime('%d/%m/%Y') if essay.created_at else "N/A" }}</td>
+          <td class="essay-score">
+            <div class="score-badge {% if essay.score_total >= 700 %}score-high{% elif essay.score_total >= 500 %}score-medium{% else %}score-low{% endif %}">
+              {{ essay.score_total }}
+            </div>
+          </td>
+          <td class="essay-actions">
+            <a href="{{ url_for('feedback_page', essay_id=essay.id) }}" class="btn-view">
+              <i class="fas fa-eye"></i> Ver feedback
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if essays|length >= 2 %}
+<div class="performance-chart">
+  <h2>Progresso das Notas</h2>
+  <div id="progress-chart"></div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const data = {
+      x: [{% for essay in essays %}'{{ essay.title if essay.title else "Redação " + loop.index|string }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+      y: [{% for essay in essays %}{{ essay.score_total }}{% if not loop.last %}, {% endif %}{% endfor %}],
+      type: 'scatter',
+      mode: 'lines+markers',
+      marker: {
+        color: '#3E64FF',
+        size: 8
+      },
+      line: {
+        color: '#3E64FF',
+        width: 2
+      }
+    };
+
+    const layout = {
+      margin: { t: 20, l: 40, r: 20, b: 80 },
+      xaxis: {
+        tickangle: -45
+      },
+      yaxis: {
+        range: [0, 1000]
+      }
+    };
+
+    Plotly.newPlot('progress-chart', [data], layout, {responsive: true});
+  });
+</script>
+{% endif %}
+
+{% else %}
+<div class="no-essays">
+  <div class="no-data-message">
+    <i class="fas fa-pencil-alt"></i>
+    <h3>Você ainda não enviou nenhuma redação</h3>
+    <p>Comece agora mesmo e receba feedback detalhado sobre seu desempenho.</p>
+    <a href="{{ url_for('submit_essay') }}" class="btn-primary">Enviar minha primeira redação</a>
+  </div>
+</div>
+{% endif %}
+
+{% if user.credits <= 0 %}
+<div class="credits-alert">
+  <i class="fas fa-exclamation-triangle"></i>
+  <div class="alert-content">
+    <h3>Seus créditos acabaram</h3>
+    <p>Adquira mais créditos para continuar enviando redações e recebendo feedback.</p>
+    <a href="#" class="btn-primary">Comprar créditos</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
